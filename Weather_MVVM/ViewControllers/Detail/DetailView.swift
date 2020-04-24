@@ -2,74 +2,56 @@
 //  DetailView.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import PureLayout
+import TinyConstraints
 
 class DetailView: UIView {
-        
+    let cellHeight: CGFloat = 70
+    
     //MARK: - Create UIElements
-    lazy var bgImageView: UIImageView = {
-        let view = UIImageView.newAutoLayoutView()
-        
-        return view
-    }()
+    lazy var bgImageView = UIImageView()
 
     lazy var topView: DetailTopView = {
-        let view = DetailTopView.newAutoLayoutView()
-        view.backgroundColor = BLACK
-        view.hidden = true
-        
+        let view = DetailTopView()
+        view.backgroundColor = .black
         return view
     }()
     
     lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
-        let view = UICollectionView(frame: CGRectZero, collectionViewLayout: layout)
-        
-        layout.scrollDirection = .Horizontal
-        layout.itemSize = CGSize(width: DE_TIME_CELL_SIZE, height: DE_TIME_CELL_SIZE)
-        layout.sectionInset = UIEdgeInsetsZero
+        layout.scrollDirection = .horizontal
+        layout.sectionInset = .zero
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
-        
-        view.backgroundColor = BLACK
+        layout.itemSize = CGSize(width: cellHeight, height: cellHeight)
+        let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        view.backgroundColor = .black
         view.showsHorizontalScrollIndicator = false
-        view.hidden = true
-
         return view
     }()
     
     lazy var tableView: UITableView = {
-        let view = UITableView.newAutoLayoutView()
-        view.backgroundColor = BLACK
-        view.separatorStyle = .None
+        let view = UITableView()
+        view.backgroundColor = .black
+        view.separatorStyle = .none
         view.showsVerticalScrollIndicator = false
-        view.hidden = true
-
         return view
     }()
     
     //MARK: - Initialize
     init() {
-        super.init(frame: CGRectZero)
+        super.init(frame: .zero)
         
-        backgroundColor = WHITE
+        backgroundColor = .white
         addAllUIElements()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    //MARK: - Public Methods -
-    func showViews() {
-        topView.hidden              = false
-        collectionView.hidden       = false
-        tableView.hidden            = false
     }
     
     //MARK: - Privat Methods -
@@ -84,21 +66,25 @@ class DetailView: UIView {
     
     //MARK: - Constraints
     func setConstraints() {
-        bgImageView.autoPinEdgesToSuperviewEdges()
+        let inset: CGFloat = 10
+        let topInet: CGFloat = 64
+        let topHeight: CGFloat = 170
+
+        bgImageView.edgesToSuperview()
         
-        topView.autoPinEdgeToSuperviewEdge(.Top, withInset: NAV_HEIGHT)
-        topView.autoPinEdgeToSuperviewEdge(.Left)
-        topView.autoPinEdgeToSuperviewEdge(.Right)
-        topView.autoSetDimension(.Height, toSize: DE_TOP_HEIGHT)
+        topView.topToSuperview(offset: topInet)
+        topView.leadingToSuperview()
+        topView.trailingToSuperview()
+        topView.height(topHeight)
         
-        collectionView.autoPinEdge(.Top, toEdge: .Bottom, ofView: topView, withOffset: DE_OFFSET/2)
-        collectionView.autoPinEdgeToSuperviewEdge(.Left)
-        collectionView.autoPinEdgeToSuperviewEdge(.Right)
-        collectionView.autoSetDimension(.Height, toSize: DE_TIME_CELL_SIZE)
+        collectionView.topToBottom(of: topView, offset: inset)
+        collectionView.leadingToSuperview()
+        collectionView.trailingToSuperview()
+        collectionView.height(cellHeight)
         
-        tableView.autoPinEdge(.Top, toEdge: .Bottom, ofView: collectionView, withOffset: DE_OFFSET/2)
-        tableView.autoPinEdgeToSuperviewEdge(.Left)
-        tableView.autoPinEdgeToSuperviewEdge(.Right)
-        tableView.autoPinEdgeToSuperviewEdge(.Bottom)
+        tableView.topToBottom(of: collectionView, offset: inset)
+        tableView.leadingToSuperview()
+        tableView.trailingToSuperview()
+        tableView.bottomToSuperview()
     }
 }

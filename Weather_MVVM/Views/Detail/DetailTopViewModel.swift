@@ -2,13 +2,13 @@
 //  DetailTopViewModel.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 protocol DetailTopViewModelType {
     var cityName: String { get }
-    var iconImage: String { get }
+    var icon: String { get }
     var title: String { get }
     var temp: String { get }
     var week: String { get }
@@ -16,21 +16,20 @@ protocol DetailTopViewModelType {
 }
 
 struct DetailTopViewModel: DetailTopViewModelType {
-
     let cityName: String
-    let iconImage: String
+    let icon: String
     let title: String
     let temp: String
     let week: String
     let tempAverage: String
 
-    init(city: CityForecast) {
-        self.cityName       = city.name
-        self.iconImage      = "http:" + city.current.condition.icon
-        self.title          = city.current.condition.text
-        self.temp           = city.current.tempC.celsius
-        self.week           = city.forecastDays.first!.date.weekDay
-        self.tempAverage    = city.forecastDays.first!.day.maxTemp.celsius + "    " + city.forecastDays.first!.day.minTemp.celsius
+    init(data: DetailObject) {
+        
+        self.cityName       = data.timezone
+        self.icon           = data.current.weather.first!.icon + "@2x.png"
+        self.title          = data.current.weather.first!.main
+        self.temp           = data.current.temp.celsius
+        self.week           = data.current.dateTime.weekDay
+        self.tempAverage    = data.daily.first!.temp.max.celsius + "    " + data.daily.first!.temp.min.celsius
     }
-
 }

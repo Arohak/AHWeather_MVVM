@@ -2,18 +2,18 @@
 //  BaseView.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import PureLayout
+import TinyConstraints
 
 //MARK: - BaseTableViewCell -
 class BaseTableViewCell: UITableViewCell {
     
     // MARK: - Initializing -
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         self.initialize()
@@ -48,10 +48,10 @@ class MLabel: UILabel {
     
     //MARK: - Initialize
     init() {
-        super.init(frame: CGRectZero)
+        super.init(frame: .zero)
         
-        font = LA_LBL_FONT
-        textColor = WHITE
+        font = .systemFont(ofSize: 14)
+        textColor = .white
         numberOfLines = 0
     }
     
@@ -69,8 +69,8 @@ class MButton: UIButton {
     override init(frame : CGRect) {
         super.init(frame: frame)
         
-        self.exclusiveTouch = true
-        self.titleLabel?.font = DE_TITLE_FONT
+        self.isExclusiveTouch = true
+        self.titleLabel?.font = .boldSystemFont(ofSize: 16)
     }
     
     required init?(coder aDecoder: NSCoder) {

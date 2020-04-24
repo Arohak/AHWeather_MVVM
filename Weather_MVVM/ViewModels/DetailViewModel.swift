@@ -2,67 +2,58 @@
 //  DetailViewModel.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
-import RxSwift
+import Foundation
+import CoreLocation
+import Combine
 
 protocol DetailViewModelType {
-    
-    var cityName: String { get }
-    func viewIsReady() -> Observable<DetailModelType>
+    var coord: CLLocationCoordinate2D { get }
+    func viewIsReady() -> AnyPublisher<DetailModelType, Never>
 }
 
 struct DetailViewModel: DetailViewModelType {
-    var cityName: String
+    var coord: CLLocationCoordinate2D
     
-    init(cityName: String) {
-        self.cityName = cityName
+    init(coord: CLLocationCoordinate2D) {
+        self.coord = coord
     }
 }
 
 extension DetailViewModel {
-    
-    func viewIsReady() -> Observable<DetailModelType> {
-        return Observable.create { observer in
-        _ = apiHelper.rx_GetCityForecast(self.cityName, days: "7")
-            .subscribe(onNext: { data in
-                if let error = data["error"]["message"].string {
-                    UIHelper.showHUD(error)
-                    return
+    func viewIsReady() -> AnyPublisher<DetailModelType, Never> {
+        let request = WeatherAPI.detail(coord: coord)
+        let response: AnyPublisher<OWDetailDTO, Error> = Agent.run(request)
+        return response
+            .receive(on: RunLoop.main)
+            .map { data -> DetailModelType in
+                let forecast = DetailObject(data: data)
+                DBHelper.storeCity(forecast: forecast)
+                let object = DBHelper.getForecast(for: self.coord).map { $0 }.first!
+                let viewModel = self.createDetailModel(forecast: object)
+                return viewModel
+            }
+            .tryCatch { error -> Just<DetailModelType> in
+                if let forecast = DBHelper.getForecast(for: self.coord).map({ $0 }).first {
+                    return Just(self.createDetailModel(forecast: forecast))
                 }
-                let cityForecast = CityForecast(data: data)
-                dbHelper.storeCityForecast(cityForecast)
-                let object = dbHelper.getStoredCityForecast(cityForecast.name).map({$0})[0]
-                let viewModel = self.createDetailModel(object)
-                
-                observer.onNext(viewModel)
-                
-                }, onError: { e in
-                    UIHelper.showHUD("No Internet Connection")
-                    var object: CityForecast?
-                    if dbHelper.getStoredCityForecast(self.cityName).map({$0}).count > 0 {
-                        object = dbHelper.getStoredCityForecast(self.cityName).map({$0})[0]
-                        let viewModel = self.createDetailModel(object!)
-                        
-                        observer.onNext(viewModel)
-                    }
-                    
-            })
-            
-            return AnonymousDisposable { }
-        }
+                throw error
+            }
+            .assertNoFailure()
+            .eraseToAnyPublisher()
     }
     
-    private func createDetailModel(cityForecast: CityForecast) -> DetailModel {
-        let topView = DetailTopViewModel(city: cityForecast)
-        var dayCells = [DetailDayCellModelType]()
-        for day in cityForecast.forecastDays {
-            dayCells.append(DetailDayCellModel(forecastDay: day))
+    private func createDetailModel(forecast: DetailObject) -> DetailModelType {
+        let topView = DetailTopViewModel(data: forecast)
+        var dayCells: [DetailDayCellModelType] = []
+        for i in 1..<forecast.daily.count {
+            let item = DetailDayCellModel(day: forecast.daily[i], hours: forecast.hourly)
+            dayCells.append(item)
         }
         let viewModel = DetailModel(topView: topView, dayCells: dayCells)
-        
         return viewModel
     }
 }

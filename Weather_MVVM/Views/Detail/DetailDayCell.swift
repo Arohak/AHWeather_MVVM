@@ -2,12 +2,11 @@
 //  DetailDayCell.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import RxSwift
 import Kingfisher
 
 final class DetailDayCell: BaseTableViewCell {
@@ -17,29 +16,46 @@ final class DetailDayCell: BaseTableViewCell {
     
     // MARK: - Initializing -
     override func initialize() {
-        backgroundColor = CLEAR
-        selectionStyle = .None
+        backgroundColor = .clear
+        selectionStyle = .none
         
         contentView.addSubview(cellContentView)
-        cellContentView.autoPinEdgesToSuperviewEdges()
+        cellContentView.edgesToSuperview()
     }
     
     // MARK: - Configuring -
     func configure(viewModel: DetailDayCellModelType) {
-        cellContentView.titleLabel.text     = viewModel.title
-        cellContentView.tempLabel.text      = viewModel.temp
-        cellContentView.iconImageView.kf_setImageWithURL(NSURL(string: viewModel.iconImage), placeholderImage: UIImage(named: ""))
+        cellContentView.titleLabel.text = viewModel.title
+        cellContentView.tempLabel.text  = viewModel.temp
+        cellContentView.iconImageView.kf.setImage(with: URL(string: viewModel.icon))
     }
 }
 
 //MARK: - DetailDayCellContentView
 class DetailDayCellContentView: UIView {
     
+    let font: UIFont = .systemFont(ofSize: 16)
+    
+    //MARK: - Create UIElements -
+    lazy var iconImageView = UIImageView()
+
+    lazy var titleLabel: MLabel = {
+        let view = MLabel()
+        view.font = font
+        return view
+    }()
+        
+    lazy var tempLabel: MLabel = {
+        let view = MLabel()
+        view.font = font
+        return view
+    }()
+    
     //MARK: - Initialize -
     init() {
-        super.init(frame: CGRectZero)
+        super.init(frame: .zero)
         
-        backgroundColor = CLEAR
+        backgroundColor = .clear
         addAllUIElements()
     }
     
@@ -58,34 +74,16 @@ class DetailDayCellContentView: UIView {
     
     //MARK: - Constraints -
     func setConstraints() {
-        titleLabel.autoAlignAxisToSuperviewAxis(.Horizontal)
-        titleLabel.autoPinEdgeToSuperviewEdge(.Left, withInset: LA_INSET)
+        let inset: CGFloat = 20
+        let iconSize = CGSize(width: 30, height: 30)
+
+        titleLabel.centerYToSuperview()
+        titleLabel.leadingToSuperview(offset: inset)
         
-        iconImageView.autoCenterInSuperview()
-        iconImageView.autoSetDimensionsToSize(CGSize(width: LA_ICON_SIZE, height: LA_ICON_SIZE))
+        iconImageView.centerInSuperview()
+        iconImageView.size(iconSize)
         
-        tempLabel.autoAlignAxisToSuperviewAxis(.Horizontal)
-        tempLabel.autoPinEdgeToSuperviewEdge(.Right, withInset: LA_INSET)
+        tempLabel.centerYToSuperview()
+        tempLabel.trailingToSuperview(offset: inset)
     }
-    
-    //MARK: - Create UIElements -
-    lazy var titleLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = DE_TITLE_FONT
-        
-        return view
-    }()
-    
-    lazy var iconImageView: UIImageView = {
-        let view = UIImageView.newAutoLayoutView()
-        
-        return view
-    }()
-    
-    lazy var tempLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = DE_TITLE_FONT
-        
-        return view
-    }()
 }

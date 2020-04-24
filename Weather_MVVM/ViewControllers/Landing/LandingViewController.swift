@@ -2,12 +2,12 @@
 //  LandingViewController.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import RxSwift
+import Combine
 
 final class LandingViewController: BaseViewController {
     
@@ -34,7 +34,7 @@ final class LandingViewController: BaseViewController {
         super.viewDidLoad()
         
         configureView()
-        configure(viewModel)
+        configure(viewModel: viewModel)
     }
     
     // MARK: - Configuring -
@@ -45,43 +45,41 @@ final class LandingViewController: BaseViewController {
         
         landingView.tableView.dataSource = self
         landingView.tableView.delegate = self
-        landingView.tableView.registerClass(LandingCell.self, forCellReuseIdentifier: cellIdentifire)
+        landingView.tableView.register(LandingCell.self, forCellReuseIdentifier: cellIdentifire)
     }
     
     private func configure(viewModel: LandingViewModelType) {
         _ = viewModel.viewIsReady()
-            .subscribeNext({ cities in
+            .sink { cities in
                 self.cities = cities
-                
                 self.landingView.tableView.reloadData()
-            })
+        }
+            .store(in: &cancellableSet)
     }
 }
 
 //MARK: - extension for UITableView -
 extension LandingViewController: UITableViewDataSource, UITableViewDelegate {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return cities.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifire) as! LandingCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifire) as! LandingCell
         let city = cities[indexPath.row]
-        cell.configure(city)
-        
+        cell.configure(viewModel: city)
         return cell
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         let city = cities[indexPath.row]
         
-        _ = viewModel.cityDidSelect(city)
-            .subscribeNext { viewModel in
-                let viewController = DetailViewController(viewModel: viewModel)
-                Wireframe.pushViewController(viewController)
+        _ = viewModel.cityDidSelect(cellModel: city)
+            .sink { viewModel in
+                let vc = DetailViewController(viewModel: viewModel)
+                self.navigationController?.pushViewController(vc, animated: true)
         }
     }
 }

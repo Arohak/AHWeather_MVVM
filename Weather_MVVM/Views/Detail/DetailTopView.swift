@@ -2,18 +2,58 @@
 //  DetailTopView.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import PureLayout
+import TinyConstraints
+import Kingfisher
 
 class DetailTopView: UIView {
 
+    private let nameFont = UIFont.systemFont(ofSize: 22)
+    private let titleFont = UIFont.systemFont(ofSize: 18)
+    private let tempFont = UIFont.boldSystemFont(ofSize: 22)
+    
+    //MARK: - Create UIElements -
+    lazy var cityNameLabel: MLabel = {
+        let view = MLabel()
+        view.font = nameFont
+        view.textAlignment = .center
+        return view
+    }()
+    
+    lazy var iconImageView = UIImageView()
+    
+    lazy var titleLabel: MLabel = {
+        let view = MLabel()
+        view.font = titleFont
+        return view
+    }()
+    
+    lazy var tempLabel: MLabel = {
+        let view = MLabel()
+        view.font = tempFont
+        view.textAlignment = .center
+        return view
+    }()
+    
+    lazy var weekLabel: MLabel = {
+        let view = MLabel()
+        view.font = titleFont
+        return view
+    }()
+    
+    lazy var tempAverageLabel: MLabel = {
+        let view = MLabel()
+        view.font = titleFont
+        return view
+    }()
+    
     //MARK: - Initialize -
     init() {
-        super.init(frame: CGRectZero)
+        super.init(frame: .zero)
         
         addAllUIElements()
     }
@@ -29,7 +69,7 @@ class DetailTopView: UIView {
         tempLabel.text          = viewModel.temp
         weekLabel.text          = viewModel.week
         tempAverageLabel.text   = viewModel.tempAverage
-        iconImageView.kf_setImageWithURL(NSURL(string: viewModel.iconImage), placeholderImage: UIImage(named: ""))
+        iconImageView.kf.setImage(with: URL(string: viewModel.icon))
     }
     
     //MARK: - Privat Methods -
@@ -46,69 +86,27 @@ class DetailTopView: UIView {
     
     //MARK: - Constraints -
     func setConstraints() {
-        cityNameLabel.autoPinEdgeToSuperviewEdge(.Top, withInset: DE_OFFSET/2)
-        cityNameLabel.autoPinEdgeToSuperviewEdge(.Left)
-        cityNameLabel.autoPinEdgeToSuperviewEdge(.Right)
-        
-        iconImageView.autoPinEdge(.Top, toEdge: .Bottom, ofView: cityNameLabel, withOffset: -DE_INSET)
-        iconImageView.autoAlignAxis(.Vertical, toSameAxisOfView: cityNameLabel, withOffset: -DE_INSET)
-        iconImageView.autoSetDimensionsToSize(CGSize(width: DE_ICON_SIZE, height: DE_ICON_SIZE))
-        
-        titleLabel.autoAlignAxis(.Horizontal, toSameAxisOfView: iconImageView)
-        titleLabel.autoPinEdge(.Left, toEdge: .Right, ofView: iconImageView)
-        
-        tempLabel.autoPinEdge(.Top, toEdge: .Bottom, ofView: iconImageView, withOffset: -DE_OFFSET)
-        tempLabel.autoPinEdgeToSuperviewEdge(.Left)
-        tempLabel.autoPinEdgeToSuperviewEdge(.Right)
-        
-        weekLabel.autoPinEdgeToSuperviewEdge(.Bottom, withInset: DE_INSET)
-        weekLabel.autoPinEdgeToSuperviewEdge(.Left, withInset: DE_INSET)
+        let inset: CGFloat = 15
+        let iconSize: CGFloat = 50
 
-        tempAverageLabel.autoAlignAxis(.Horizontal, toSameAxisOfView: weekLabel)
-        tempAverageLabel.autoPinEdgeToSuperviewEdge(.Right, withInset: DE_INSET)
+        cityNameLabel.topToSuperview(offset: inset)
+        cityNameLabel.leadingToSuperview()
+        cityNameLabel.trailingToSuperview()
+        
+        iconImageView.topToBottom(of: cityNameLabel)
+        iconImageView.centerXToSuperview(offset: inset)
+        iconImageView.size(CGSize(width: iconSize, height: iconSize))
+        
+        tempLabel.centerY(to: iconImageView)
+        tempLabel.trailingToLeading(of: iconImageView)
+        
+        titleLabel.topToBottom(of: iconImageView)
+        titleLabel.centerXToSuperview()
+        
+        weekLabel.bottomToSuperview(offset: -inset)
+        weekLabel.leadingToSuperview(offset: inset)
+
+        tempAverageLabel.centerY(to: weekLabel)
+        tempAverageLabel.trailingToSuperview(offset: inset)
     }
-    
-    //MARK: - Create UIElements -
-    lazy var cityNameLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = DE_NAME_FONT
-        view.textAlignment = .Center
-        
-        return view
-    }()
-    
-    lazy var iconImageView: UIImageView = {
-        let view = UIImageView.newAutoLayoutView()
-        
-        return view
-    }()
-    
-    lazy var titleLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = DE_TITLE_FONT
-        
-        return view
-    }()
-    
-    lazy var tempLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = DE_TEMP_FONT
-        view.textAlignment = .Center
-        
-        return view
-    }()
-    
-    lazy var weekLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = DE_TITLE_FONT
-        
-        return view
-    }()
-    
-    lazy var tempAverageLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = DE_TITLE_FONT
-        
-        return view
-    }()
 }

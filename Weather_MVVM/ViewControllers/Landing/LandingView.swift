@@ -2,38 +2,34 @@
 //  LandingView.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import PureLayout
+import TinyConstraints
 
 class LandingView: UIView {
     
     //MARK: - Create UIElements -
-    lazy var bgImageView: UIImageView = {
-        let view = UIImageView.newAutoLayoutView()
-        
-        return view
-    }()
+    lazy var bgImageView = UIImageView()
     
     lazy var tableView: UITableView = {
-        let view = UITableView.newAutoLayoutView()
+        let view = UITableView()
         view.estimatedRowHeight = 44
-        view.rowHeight = UITableViewAutomaticDimension
+        view.rowHeight = UITableView.automaticDimension
         view.showsVerticalScrollIndicator = false
-        view.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
-        view.backgroundColor = BLACK
+        view.contentInset = .zero
+        view.backgroundColor = .black
 
         return view
     }()
     
     //MARK: - Initialize -
     init() {
-        super.init(frame: CGRectZero)
+        super.init(frame: .zero)
         
-        backgroundColor = BLACK
+        backgroundColor = .black
         addAllUIElements()
     }
 
@@ -51,7 +47,7 @@ class LandingView: UIView {
     
     //MARK: - Constraints -
     func setConstraints() {
-        bgImageView.autoPinEdgesToSuperviewEdges()
-        tableView.autoPinEdgesToSuperviewEdgesWithInsets(UIEdgeInsets(top: NAV_HEIGHT, left: 0, bottom: 0, right: 0))
+        bgImageView.edgesToSuperview()
+        tableView.edgesToSuperview()
     }
 }

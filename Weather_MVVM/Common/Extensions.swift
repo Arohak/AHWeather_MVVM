@@ -2,67 +2,82 @@
 //  Extensions.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import Foundation
 
 extension Double {
-    
     var round: String {
         let number = Int(self)
-        return "\(number)"
+        let mark = number > 0 ? "+" : ""
+        return mark + "\(number)"
     }
     
     var celsius: String {
         return  self.round + "\u{00B0}"
     }
-    
+}
+
+extension Int {
     var hPa: String {
-        return  self.round + " hPa"
+        return  "\(self)" + " hPa"
     }
     
     var percent: String {
-        return  self.round + " %"
+        return  "\(self)" + " %"
+    }
+    
+    var hour_: String {
+        let date = Date(timeIntervalSinceNow: Double(self))
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = NSTimeZone.default
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.dateFormat = "HH"
+        let str = dateFormatter.string(from: date)
+        return str + ":00"
+    }
+    
+    var hour: String {
+        let date = Date(timeIntervalSinceNow: Double(self))
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = NSTimeZone.default
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.dateFormat = "HH:mm"
+        return dateFormatter.string(from: date)
+    }
+    
+    var shortTime: String {
+        let date = Date(timeIntervalSince1970: Double(self))
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = NSTimeZone.default
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.dateFormat = "h:mm a"
+        dateFormatter.amSymbol = "AM"
+        dateFormatter.pmSymbol = "PM"
+        let time = dateFormatter.string(from: date)
+        return time
+    }
+    
+    var weekDay: String {
+        let date = Date(timeIntervalSince1970: Double(self))
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = NSTimeZone.default
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.dateFormat = "d, MMM, E" //EEEE"
+        return dateFormatter.string(from: date)
     }
 }
 
 extension String {
-    
     var hour: String {
-        let dateFormatter = NSDateFormatter()
-        dateFormatter.timeZone = NSTimeZone.defaultTimeZone()
-        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+        let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = NSTimeZone.default
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-        let date = dateFormatter.dateFromString(self)
+        let date = dateFormatter.date(from: self)
         dateFormatter.dateFormat = "HH:mm"
-        return dateFormatter.stringFromDate(date!)
+        return dateFormatter.string(from: date!)
     }
-    
-    var shortTime: String {
-        if let interval : NSTimeInterval = NSTimeInterval(self) {
-            let date = NSDate(timeIntervalSince1970: interval)
-            let dateFormatter = NSDateFormatter()
-            dateFormatter.dateFormat = "h:mm a"
-            dateFormatter.AMSymbol = "AM"
-            dateFormatter.PMSymbol = "PM"
-            let time = dateFormatter.stringFromDate(date)
-            return time
-        }
-        
-        return ""
-    }
-    
-    var weekDay: String {
-        let dateFormatter = NSDateFormatter()
-        dateFormatter.timeZone = NSTimeZone.defaultTimeZone()
-        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let date = dateFormatter.dateFromString(self)
-        dateFormatter.dateFormat = "EEEE"
-        
-        return dateFormatter.stringFromDate(date!)
-    }
-    
 }

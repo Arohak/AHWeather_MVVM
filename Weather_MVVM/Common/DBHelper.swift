@@ -2,48 +2,38 @@
 //  DBHelper.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
+import CoreLocation
 import RealmSwift
 
-let dbHelper = DBHelper.sharedInstance
-
-class DBHelper {
-    
-    static let sharedInstance = DBHelper()
-    var realm: Realm!
-    
-    private init() {
-        realm = try! Realm()
-    }
-    
-    //MARK: - Weather -
-    func getStoredCities() -> Results<City> {
-        let cities = realm.objects(City.self)
+enum DBHelper {
         
+    static let realm = try! Realm()
+    
+    //MARK: - Leading -
+    static var cities: Results<LeadingObject> {
+        let cities = realm.objects(LeadingObject.self)
         return cities
     }
     
-    func storeCity(item: City) {
+    static func store(city: LeadingObject) {
         try! realm.write {
-            let item1 = realm.create(City.self, value: item, update: true)
-            realm.add(item1)
+            realm.add(city, update: .all)
         }
     }
     
-    //MARK: - Weather Forecast -
-    func getStoredCityForecast(city: String) -> Results<CityForecast> {
-        let cities = realm.objects(CityForecast).filter("name == %@", city)
-        
+    //MARK: - Detail -
+    static func getForecast(for coord: CLLocationCoordinate2D) -> Results<DetailObject> {
+        let cities = realm.objects(DetailObject.self).filter("lat = %@ AND lon = %@", coord.latitude, coord.longitude)
         return cities
     }
     
-    func storeCityForecast(item: CityForecast) {
+    static func storeCity(forecast: DetailObject) {
         try! realm.write {
-            let city = realm.create(CityForecast.self, value: item, update: true)
-            realm.add(city)
+            realm.add(forecast, update: .all)
         }
     }
 }

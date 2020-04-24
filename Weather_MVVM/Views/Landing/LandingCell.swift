@@ -2,32 +2,29 @@
 //  LandingCell.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import RxSwift
-import Kingfisher
 
 final class LandingCell: BaseTableViewCell {
-    
+
     //MARK: - Create UIElements -
     var cellContentView = LandingCellContentView()
     
     // MARK: - Initializing -
     override func initialize() {
-        backgroundColor = CLEAR
-        selectionStyle = .None
+        backgroundColor = .clear
+        selectionStyle = .none
         
         contentView.addSubview(cellContentView)
-        cellContentView.autoPinEdgesToSuperviewEdges()
+        cellContentView.edgesToSuperview()
     }
     
     // MARK: - Configuring -
     func configure(viewModel: LandingCellModelType) {
         cellContentView.cityNameLabel.text  = viewModel.name
-        cellContentView.titleLabel.text     = viewModel.desc
         cellContentView.tempLabel.text      = viewModel.temp
         cellContentView.sysLabel.text       = "Sunrise:  " + viewModel.sunrise + "\nSunset:  " + viewModel.sunset
         cellContentView.mphLabel.text       = "\nHumidity:  " + viewModel.humidity + "\nPressure:  " + viewModel.pressure
@@ -37,12 +34,33 @@ final class LandingCell: BaseTableViewCell {
 
 //MARK: - LandingCellContentView -
 final class LandingCellContentView: UIView {
+    let nameFont: UIFont = .boldSystemFont(ofSize: 22)
+    let titleFont: UIFont = .systemFont(ofSize: 18)
+
+    //MARK: - Create UIElements -
+    lazy var cityNameLabel: MLabel = {
+        let view = MLabel()
+        view.font = nameFont
+        return view
+    }()
+    
+    lazy var tempLabel: MLabel = {
+        let view = MLabel()
+        view.font = nameFont
+        return view
+    }()
+    
+    lazy var mphLabel = MLabel()
+    
+    lazy var kphLabel = MLabel()
+    
+    lazy var sysLabel = MLabel()
     
     //MARK: - Initialize -
     init() {
-        super.init(frame: CGRectZero)
+        super.init(frame: .zero)
         
-        backgroundColor = CLEAR
+        backgroundColor = .clear
         addAllUIElements()
     }
     
@@ -53,8 +71,6 @@ final class LandingCellContentView: UIView {
     //MARK: - Privat Methods -
     func addAllUIElements() {
         addSubview(cityNameLabel)
-        addSubview(iconImageView)
-        addSubview(titleLabel)
         addSubview(tempLabel)
         addSubview(sysLabel)
         addSubview(mphLabel)
@@ -65,74 +81,24 @@ final class LandingCellContentView: UIView {
     
     //MARK: - Constraints -
     func setConstraints() {
-        cityNameLabel.autoPinEdgeToSuperviewEdge(.Top, withInset: LA_INSET/2)
-        cityNameLabel.autoAlignAxisToSuperviewAxis(.Vertical)
+        let offset: CGFloat = 4
+        let inset: CGFloat = 20
+
+        cityNameLabel.topToSuperview(offset: inset)
+        cityNameLabel.centerXToSuperview()
         
-        iconImageView.autoPinEdgeToSuperviewEdge(.Left, withInset: LA_INSET)
-        iconImageView.autoPinEdge(.Top, toEdge: .Bottom, ofView: cityNameLabel, withOffset: LA_INSET)
-        iconImageView.autoSetDimensionsToSize(CGSize(width: LA_ICON_SIZE, height: LA_ICON_SIZE))
+        tempLabel.topToBottom(of: cityNameLabel, offset: offset)
+        tempLabel.centerXToSuperview()
         
-        titleLabel.autoPinEdge(.Top, toEdge: .Bottom, ofView: cityNameLabel, withOffset: 0)
-        titleLabel.autoAlignAxisToSuperviewAxis(.Vertical)
+        sysLabel.leadingToSuperview(offset: inset)
+        sysLabel.topToBottom(of: tempLabel, offset: inset)
         
-        tempLabel.autoPinEdge(.Top, toEdge: .Bottom, ofView: titleLabel, withOffset: LA_INSET/2)
-        tempLabel.autoAlignAxisToSuperviewAxis(.Vertical)
+        mphLabel.leadingToSuperview(offset: inset)
+        mphLabel.topToBottom(of: sysLabel)
         
-        sysLabel.autoPinEdgeToSuperviewEdge(.Left, withInset: LA_INSET)
-        sysLabel.autoPinEdge(.Top, toEdge: .Bottom, ofView: tempLabel, withOffset: 0)
-        
-        mphLabel.autoPinEdgeToSuperviewEdge(.Left, withInset: LA_INSET)
-        mphLabel.autoPinEdge(.Top, toEdge: .Bottom, ofView: sysLabel, withOffset: 0)
-        
-        kphLabel.autoPinEdgeToSuperviewEdge(.Left, withInset: LA_INSET)
-        kphLabel.autoPinEdge(.Top, toEdge: .Bottom, ofView: mphLabel, withOffset: 0)
-        kphLabel.autoPinEdgeToSuperviewEdge(.Bottom, withInset: LA_INSET)
+        kphLabel.leadingToSuperview(offset: inset)
+        kphLabel.topToBottom(of: mphLabel)
+        kphLabel.bottomToSuperview()
     }
-    
-    //MARK: - Create UIElements -
-    lazy var cityNameLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = DE_NAME_FONT
-        
-        return view
-    }()
-    
-    lazy var iconImageView: UIImageView = {
-        let view = UIImageView.newAutoLayoutView()
-        
-        return view
-    }()
-    
-    lazy var titleLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = TITLE_LBL_FONT
-        
-        return view
-    }()
-    
-    lazy var tempLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        view.font = LA_TEMP_FONT
-        
-        return view
-    }()
-    
-    lazy var mphLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        
-        return view
-    }()
-    
-    lazy var kphLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        
-        return view
-    }()
-    
-    lazy var sysLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        
-        return view
-    }()
 }
 

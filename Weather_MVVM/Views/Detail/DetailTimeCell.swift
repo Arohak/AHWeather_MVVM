@@ -2,12 +2,11 @@
 //  DetailTimeCell.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import RxSwift
 import Kingfisher
 
 final class DetailTimeCell: BaseCollectionViewCell {
@@ -17,17 +16,17 @@ final class DetailTimeCell: BaseCollectionViewCell {
     
     // MARK: - Initializing -
     override func initialize() {
-        backgroundColor = CLEAR
+        backgroundColor = .clear
         
         addSubview(cellContentView)
-        cellContentView.autoPinEdgesToSuperviewEdges()
+        cellContentView.edgesToSuperview()
     }
     
     // MARK: - Configuring -
     func configure(viewModel: DetailTimeCellModelType) {
-        cellContentView.timeLabel.text      = viewModel.time
-        cellContentView.tempLabel.text      = viewModel.temp
-        cellContentView.iconImageView.kf_setImageWithURL(NSURL(string: viewModel.iconImage), placeholderImage: UIImage(named: ""))
+        cellContentView.timeLabel.text  = viewModel.time
+        cellContentView.tempLabel.text  = viewModel.temp
+        cellContentView.iconImageView.kf.setImage(with: URL(string: viewModel.icon))
     }
 }
 
@@ -35,9 +34,16 @@ final class DetailTimeCell: BaseCollectionViewCell {
 //MARK: - DetailTimeCellContentView
 class DetailTimeCellContentView: UIView {
     
+    //MARK: - Create UIElements -
+    lazy var timeLabel = MLabel()
+    
+    lazy var iconImageView = UIImageView()
+    
+    lazy var tempLabel = MLabel()
+    
     //MARK: - Initialize
     init() {
-        super.init(frame: CGRectZero)
+        super.init(frame: .zero)
         
         addAllUIElements()
     }
@@ -57,32 +63,16 @@ class DetailTimeCellContentView: UIView {
     
     //MARK: - Constraints -
     func setConstraints() {
-        timeLabel.autoAlignAxisToSuperviewAxis(.Vertical)
-        timeLabel.autoPinEdgeToSuperviewEdge(.Top, withInset: 0)
+        let inset: CGFloat = 5
+        let iconSize = CGSize(width: 30, height: 30)
+
+        timeLabel.centerXToSuperview()
+        timeLabel.topToSuperview(offset: inset)
         
-        iconImageView.autoCenterInSuperview()
-        iconImageView.autoSetDimensionsToSize(CGSize(width: DE_TIME_CELL_SIZE/2, height: DE_TIME_CELL_SIZE/2))
+        iconImageView.centerInSuperview()
+        iconImageView.size(iconSize)
         
-        tempLabel.autoAlignAxisToSuperviewAxis(.Vertical)
-        tempLabel.autoPinEdgeToSuperviewEdge(.Bottom, withInset: 0)
+        tempLabel.centerXToSuperview()
+        tempLabel.bottomToSuperview(offset: -inset)
     }
-    
-    //MARK: - Create UIElements -
-    lazy var timeLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        
-        return view
-    }()
-    
-    lazy var iconImageView: UIImageView = {
-        let view = UIImageView.newAutoLayoutView()
-        
-        return view
-    }()
-    
-    lazy var tempLabel: MLabel = {
-        let view = MLabel.newAutoLayoutView()
-        
-        return view
-    }()
 }

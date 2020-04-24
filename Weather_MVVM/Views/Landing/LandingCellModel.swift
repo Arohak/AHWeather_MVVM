@@ -2,18 +2,18 @@
 //  LandingCellModel.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
+
+import CoreLocation
 
 protocol CityNameModelType {
     var name: String { get }
 }
 
-protocol WeatherModelType {
-    var main: String { get }
-    var desc: String { get }
-    var icon: String { get }
+protocol CityCoordinateModelType {
+    var coord: CLLocationCoordinate2D { get }
 }
 
 protocol MainModelType {
@@ -29,15 +29,11 @@ protocol SysModelType {
     var sunset: String { get }
 }
 
-protocol LandingCellModelType: CityNameModelType, WeatherModelType, MainModelType, SysModelType {
+protocol LandingCellModelType: CityNameModelType, CityCoordinateModelType, MainModelType, SysModelType {
 }
 
 struct LandingCellModel: LandingCellModelType {
-    
     let name: String
-    let main: String
-    let desc: String
-    let icon: String
     let temp: String
     let pressure: String
     let humidity: String
@@ -45,13 +41,10 @@ struct LandingCellModel: LandingCellModelType {
     let tempMax: String
     let sunrise: String
     let sunset: String
+    let coord: CLLocationCoordinate2D
     
-    init(city: City) {
-        
+    init(city: LeadingObject) {
         self.name       = city.name
-        self.main       = city.weather.main
-        self.desc       = city.weather.desc
-        self.icon       = city.weather.icon
         self.temp       = city.main.temp.celsius
         self.pressure   = city.main.pressure.hPa
         self.humidity   = city.main.humidity.percent
@@ -59,6 +52,6 @@ struct LandingCellModel: LandingCellModelType {
         self.tempMax    = city.main.tempMax.celsius
         self.sunrise    = city.sys.sunrise.shortTime
         self.sunset     = city.sys.sunset.shortTime
+        self.coord      = CLLocationCoordinate2D(latitude: city.coord.lat, longitude: city.coord.lon)
     }
-
 }

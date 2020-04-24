@@ -2,8 +2,8 @@
 //  DetailModel.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 protocol DetailModelType {
@@ -12,7 +12,6 @@ protocol DetailModelType {
 }
 
 struct DetailModel: DetailModelType {
-    
     var topView: DetailTopViewModelType
     var dayCells: [DetailDayCellModelType]
 }

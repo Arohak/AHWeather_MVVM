@@ -2,15 +2,17 @@
 //  BaseViewController.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import RxSwift
+import Combine
 
 class BaseViewController: UIViewController {
     
+    var cancellableSet: Set<AnyCancellable> = []
+
     // MARK: - Initializing -
     init() {
         super.init(nibName: nil, bundle: nil)

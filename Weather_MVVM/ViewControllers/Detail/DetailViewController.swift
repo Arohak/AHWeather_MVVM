@@ -2,12 +2,11 @@
 //  DetailViewController.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
 import UIKit
-import RxSwift
 
 class DetailViewController: BaseViewController {
     
@@ -34,7 +33,7 @@ class DetailViewController: BaseViewController {
         super.viewDidLoad()
         
         configureView()
-        configure(viewModel)
+        configure(viewModel: viewModel)
     }
 
     // MARK: - Configuring -
@@ -45,74 +44,66 @@ class DetailViewController: BaseViewController {
         
         detailView.tableView.dataSource = self
         detailView.tableView.delegate = self
-        detailView.tableView.registerClass(DetailDayCell.self, forCellReuseIdentifier: cellIdentifireTable)
+        detailView.tableView.register(DetailDayCell.self, forCellReuseIdentifier: cellIdentifireTable)
 
         detailView.collectionView.dataSource = self
         detailView.collectionView.delegate = self
-        detailView.collectionView.registerClass(DetailTimeCell.self, forCellWithReuseIdentifier: cellIdentifireCollection)
+        detailView.collectionView.register(DetailTimeCell.self, forCellWithReuseIdentifier: cellIdentifireCollection)
 
     }
     
     private func configure(viewModel: DetailViewModelType) {
         _ = viewModel.viewIsReady()
-            .subscribeNext { detail in
+            .sink { detail in
                 self.detail = detail
                 
-                self.detailView.showViews()
-                self.detailView.topView.configure(detail.topView)
+                self.detailView.topView.configure(viewModel: detail.topView)
                 self.detailView.tableView.reloadData()
                 self.detailView.collectionView.reloadData()
-        }
+            }
+            .store(in: &cancellableSet)
     }
 }
 
 //MARK: - extension for UITableView -
 extension DetailViewController: UITableViewDataSource, UITableViewDelegate {
-    
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let detail = detail {
           return detail.dayCells.count
         }
-        
         return 0
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifireTable) as! DetailDayCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifireTable) as! DetailDayCell
         let day = detail.dayCells[indexPath.row]
-        cell.configure(day)
-        
+        cell.configure(viewModel: day)
         return cell
     }
     
-    
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        
-        return LA_CELL_HEIGHT/4
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 44
     }
 }
 
 //MARK: - extension for UICollectionView -
 extension DetailViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
-    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let detail = detail {
             return detail.dayCells.first!.hours.count
         }
-        
         return 0
     }
     
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(cellIdentifireCollection, forIndexPath: indexPath) as! DetailTimeCell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifireCollection, for: indexPath as IndexPath) as! DetailTimeCell
         let hour = detail.dayCells.first!.hours[indexPath.row]
-        cell.configure(hour)
-        
+        cell.configure(viewModel: hour)
         return cell
     }
 }

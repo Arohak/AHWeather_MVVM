@@ -2,75 +2,65 @@
 //  LandingViewModel.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
-import RxSwift
-import SwiftyJSON
+import Foundation
+import Combine
 
 protocol LandingViewModelType {
-
-    func viewIsReady() -> Observable<[LandingCellModelType]>
-    func cityDidSelect(cellModel: LandingCellModelType) -> Observable<DetailViewModel>
+    func viewIsReady() -> AnyPublisher<[LandingCellModelType], Never>
+    func cityDidSelect(cellModel: LandingCellModelType) -> AnyPublisher<DetailViewModelType, Never>
 }
 
-struct LandingViewModel: LandingViewModelType {
-
-}
+struct LandingViewModel: LandingViewModelType { }
 
 // MARK: - DidSelect -
 extension LandingViewModel {
-    
-    func cityDidSelect(cellModel: LandingCellModelType) -> Observable<DetailViewModel> {
-        return Observable.create { observer in
-            let viewModel = DetailViewModel(cityName: cellModel.name)
-            observer.onNext(viewModel)
-            
-            return AnonymousDisposable { }
-        }
+    func cityDidSelect(cellModel: LandingCellModelType) -> AnyPublisher<DetailViewModelType, Never> {
+        let viewModel = DetailViewModel(coord: cellModel.coord)
+        return Just(viewModel)
+            .eraseToAnyPublisher()
     }
 }
 
 // MARK: - Cities -
-extension LandingViewModel {
-
-    func viewIsReady() -> Observable<[LandingCellModelType]> {
-        return Observable.create { observer in
-            let cities = ["London", "Moscow", "Yerevan"]
-            var count = 0
-            
-            for city in cities {
-                _ = apiHelper.rx_GetCityWeather(city)
-                    .subscribe(onNext: { data in
-                        dbHelper.storeCity(City(data: data))
-                        
-                        count += 1
-                        if count == cities.count {
-                            let cities = dbHelper.getStoredCities().map({$0})
-                            var cellModels = [LandingCellModelType]()
-                            for city in cities {
-                                let cellModel = LandingCellModel(city: city)
-                                cellModels.append(cellModel)
-                            }
-                            
-                            observer.onNext(cellModels)
-                        }
-                        
-                        }, onError: { e in
-                            UIHelper.showHUD("No Internet Connection")
-                            let cities = dbHelper.getStoredCities().map({$0})
-                            var cellModels = [LandingCellModelType]()
-                            for city in cities {
-                                let cellModel = LandingCellModel(city: city)
-                                cellModels.append(cellModel)
-                            }
-                            
-                            observer.onNext(cellModels)
-                    })
+extension LandingViewModel {    
+    func viewIsReady() -> AnyPublisher<[LandingCellModelType], Never> {
+        let one = city(with: "Yerevan")
+        let two = city(with: "Abovyan")
+        let three = city(with: "Moscow")
+        let four = city(with: "London")
+        
+        return Publishers.CombineLatest4(one, two, three, four)
+            .receive(on: RunLoop.main)
+            .map { _, _, _, _ -> [LandingCellModelType] in
+                let cities = DBHelper.cities.map { $0 }
+                let models: [LandingCellModelType] = cities.map { LandingCellModel(city: $0) }
+                return models
             }
-            
-            return AnonymousDisposable { }
-        }
+            .tryCatch { error -> Just<[LandingCellModelType]> in
+                let cities = DBHelper.cities.map { $0 }
+                let models: [LandingCellModelType] = cities.map { LandingCellModel(city: $0) }
+                if models.count > 0 {
+                    return Just(models)
+                }
+                throw error
+            }
+            .assertNoFailure()
+            .eraseToAnyPublisher()
     }
+    
+    func city(with name: String) -> AnyPublisher<Void, Error> {
+        let request = WeatherAPI.leading(city: name)
+        let response: AnyPublisher<OWLeadingDTO, Error> = Agent.run(request)
+        return response
+            .map { data in
+                let city = LeadingObject(data: data)
+                DBHelper.store(city: city)
+            }
+            .eraseToAnyPublisher()
+    }
+    
 }
