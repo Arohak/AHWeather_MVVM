@@ -11,14 +11,10 @@ import Combine
 
 final class LandingViewController: BaseViewController {
     
-    // MARK: - Properties -
-    var landingView = LandingView()
-    
+    private var landingView = LandingView()
     private var viewModel: LandingViewModelType!
-    private let cellIdentifire = "cellIdentifire"
-    private var cities = [LandingCellModelType]()
+    private var dataProvider: LandingTableDataProvider?
     
-    // MARK: - Initializing -
     init(viewModel: LandingViewModelType) {
         super.init()
         
@@ -29,57 +25,46 @@ final class LandingViewController: BaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - View Life Cycle -
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureView()
-        configure(viewModel: viewModel)
-    }
-    
-    // MARK: - Configuring -
-    private func configureView() {
-        self.view = landingView
-        
-        title = "Landing"
-        
-        landingView.tableView.dataSource = self
-        landingView.tableView.delegate = self
-        landingView.tableView.register(LandingCell.self, forCellReuseIdentifier: cellIdentifire)
-    }
-    
-    private func configure(viewModel: LandingViewModelType) {
-        _ = viewModel.viewIsReady()
-            .sink { cities in
-                self.cities = cities
-                self.landingView.tableView.reloadData()
-        }
-            .store(in: &cancellableSet)
+        configUI()
+        configDataProvider()
+        viewIsReady()
     }
 }
 
-//MARK: - extension for UITableView -
-extension LandingViewController: UITableViewDataSource, UITableViewDelegate {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return cities.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifire) as! LandingCell
-        let city = cities[indexPath.row]
-        cell.configure(viewModel: city)
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        let city = cities[indexPath.row]
+// MARK: - Private Methods
+extension LandingViewController {
         
-        _ = viewModel.cityDidSelect(cellModel: city)
+    private func configUI() {
+        view = landingView
+        title = "Landing"
+    }
+    
+    private func configDataProvider() {
+        dataProvider = LandingTableDataProvider(with: landingView.tableView)
+        dataProvider?.didSelect = { [weak self] city in
+            self?.didSelect(city: city)
+        }
+    }
+    
+    private func viewIsReady() {
+        viewModel.viewIsReady()
+            .sink { cities in
+                self.dataProvider?.update(with: cities)
+            }
+            .store(in: &cancellableSet)
+        
+        
+    }
+
+    private func didSelect(city: LandingCellModelType) {
+        viewModel.cityDidSelect(cellModel: city)
             .sink { viewModel in
                 let vc = DetailViewController(viewModel: viewModel)
                 self.navigationController?.pushViewController(vc, animated: true)
-        }
+            }
+            .store(in: &cancellableSet)
     }
 }

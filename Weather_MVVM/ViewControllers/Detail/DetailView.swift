@@ -67,12 +67,11 @@ class DetailView: UIView {
     //MARK: - Constraints
     func setConstraints() {
         let inset: CGFloat = 10
-        let topInet: CGFloat = 64
         let topHeight: CGFloat = 170
 
         bgImageView.edgesToSuperview()
         
-        topView.topToSuperview(offset: topInet)
+        topView.topToSuperview(usingSafeArea: true)
         topView.leadingToSuperview()
         topView.trailingToSuperview()
         topView.height(topHeight)
