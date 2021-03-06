@@ -9,34 +9,18 @@
 import UIKit
 import Kingfisher
 
-final class DetailDayCell: BaseTableViewCell {
+final class DetailDayCell: TableViewCell<DetailDayCellContentView> {
     
-    //MARK: - Create UIElements -
-    var cellContentView = DetailDayCellContentView()
-    
-    // MARK: - Initializing -
     override func initialize() {
         backgroundColor = .clear
         selectionStyle = .none
-        
-        contentView.addSubview(cellContentView)
-        cellContentView.edgesToSuperview()
-    }
-    
-    // MARK: - Configuring -
-    func configure(viewModel: DetailDayCellModelType) {
-        cellContentView.titleLabel.text = viewModel.title
-        cellContentView.tempLabel.text  = viewModel.temp
-        cellContentView.iconImageView.kf.setImage(with: URL(string: viewModel.icon))
     }
 }
 
-//MARK: - DetailDayCellContentView
-class DetailDayCellContentView: UIView {
+final class DetailDayCellContentView: UIView, ContainerView {
     
-    let font: UIFont = .systemFont(ofSize: 16)
+    private let font: UIFont = .systemFont(ofSize: 16)
     
-    //MARK: - Create UIElements -
     lazy var iconImageView = UIImageView()
 
     lazy var titleLabel: MLabel = {
@@ -51,7 +35,6 @@ class DetailDayCellContentView: UIView {
         return view
     }()
     
-    //MARK: - Initialize -
     init() {
         super.init(frame: .zero)
         
@@ -63,7 +46,6 @@ class DetailDayCellContentView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //MARK: - Privat Methods -
     private func addAllUIElements() {
         addSubview(iconImageView)
         addSubview(titleLabel)
@@ -72,7 +54,6 @@ class DetailDayCellContentView: UIView {
         setConstraints()
     }
     
-    //MARK: - Constraints -
     func setConstraints() {
         let inset: CGFloat = 20
         let iconSize = CGSize(width: 30, height: 30)
@@ -85,5 +66,11 @@ class DetailDayCellContentView: UIView {
         
         tempLabel.centerYToSuperview()
         tempLabel.trailingToSuperview(offset: inset)
+    }
+
+    func update(with model: DetailDayCellModelType) {
+        titleLabel.text = model.title
+        tempLabel.text  = model.temp
+        iconImageView.kf.setImage(with: URL(string: model.icon))
     }
 }

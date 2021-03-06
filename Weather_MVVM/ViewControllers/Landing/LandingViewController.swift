@@ -12,8 +12,9 @@ import Combine
 final class LandingViewController: BaseViewController {
     
     private var landingView = LandingView()
-    private var viewModel: LandingViewModelType!
-    private var dataProvider: LandingTableDataProvider?
+    private var viewModel: LandingViewModelType!    
+    private var dataProvider: TableDataProvider<LandingCellContentView, LandingCell>?
+
     
     init(viewModel: LandingViewModelType) {
         super.init()
@@ -43,7 +44,7 @@ extension LandingViewController {
     }
     
     private func configDataProvider() {
-        dataProvider = LandingTableDataProvider(with: landingView.tableView)
+        dataProvider = TableDataProvider(tableView: landingView.tableView)
         dataProvider?.didSelect = { [weak self] city in
             self?.didSelect(city: city)
         }

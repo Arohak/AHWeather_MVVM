@@ -11,7 +11,6 @@ import TinyConstraints
 
 class LandingView: UIView {
     
-    //MARK: - Create UIElements -
     lazy var bgImageView = UIImageView()
     
     lazy var tableView: UITableView = {
@@ -25,7 +24,6 @@ class LandingView: UIView {
         return view
     }()
     
-    //MARK: - Initialize -
     init() {
         super.init(frame: .zero)
         
@@ -37,7 +35,6 @@ class LandingView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //MARK: - Privat Methods -
     private func addAllUIElements() {
         addSubview(bgImageView)
         addSubview(tableView)
@@ -45,7 +42,6 @@ class LandingView: UIView {
         setConstraints()
     }
     
-    //MARK: - Constraints -
     func setConstraints() {
         bgImageView.edgesToSuperview()
         tableView.edgesToSuperview()

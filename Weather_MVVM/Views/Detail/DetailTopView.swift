@@ -16,7 +16,6 @@ class DetailTopView: UIView {
     private let titleFont = UIFont.systemFont(ofSize: 18)
     private let tempFont = UIFont.boldSystemFont(ofSize: 22)
     
-    //MARK: - Create UIElements -
     lazy var cityNameLabel: MLabel = {
         let view = MLabel()
         view.font = nameFont
@@ -62,7 +61,6 @@ class DetailTopView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Configuring -
     func configure(viewModel: DetailTopViewModelType) {
         cityNameLabel.text      = viewModel.cityName
         titleLabel.text         = viewModel.title
@@ -72,7 +70,6 @@ class DetailTopView: UIView {
         iconImageView.kf.setImage(with: URL(string: viewModel.icon))
     }
     
-    //MARK: - Privat Methods -
     func addAllUIElements() {
         addSubview(cityNameLabel)
         addSubview(iconImageView)
@@ -84,7 +81,6 @@ class DetailTopView: UIView {
         setConstraints()
     }
     
-    //MARK: - Constraints -
     func setConstraints() {
         let inset: CGFloat = 15
         let iconSize: CGFloat = 50

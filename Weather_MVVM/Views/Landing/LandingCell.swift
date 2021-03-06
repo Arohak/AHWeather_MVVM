@@ -8,36 +8,18 @@
 
 import UIKit
 
-final class LandingCell: BaseTableViewCell {
-
-    //MARK: - Create UIElements -
-    var cellContentView = LandingCellContentView()
+final class LandingCell: TableViewCell<LandingCellContentView> {
     
-    // MARK: - Initializing -
     override func initialize() {
         backgroundColor = .clear
         selectionStyle = .none
-        
-        contentView.addSubview(cellContentView)
-        cellContentView.edgesToSuperview()
-    }
-    
-    // MARK: - Configuring -
-    func configure(viewModel: LandingCellModelType) {
-        cellContentView.cityNameLabel.text  = viewModel.name
-        cellContentView.tempLabel.text      = viewModel.temp
-        cellContentView.sysLabel.text       = "Sunrise:  " + viewModel.sunrise + "\nSunset:  " + viewModel.sunset
-        cellContentView.mphLabel.text       = "\nHumidity:  " + viewModel.humidity + "\nPressure:  " + viewModel.pressure
-        cellContentView.kphLabel.text       = "\nTempMax:  " + viewModel.tempMax + "\nTempMin:  " + viewModel.tempMin
     }
 }
 
-//MARK: - LandingCellContentView -
-final class LandingCellContentView: UIView {
-    let nameFont: UIFont = .boldSystemFont(ofSize: 22)
-    let titleFont: UIFont = .systemFont(ofSize: 18)
+final class LandingCellContentView: UIView, ContainerView {
+    private let nameFont: UIFont = .boldSystemFont(ofSize: 22)
+    private let titleFont: UIFont = .systemFont(ofSize: 18)
 
-    //MARK: - Create UIElements -
     lazy var cityNameLabel: MLabel = {
         let view = MLabel()
         view.font = nameFont
@@ -51,12 +33,9 @@ final class LandingCellContentView: UIView {
     }()
     
     lazy var mphLabel = MLabel()
-    
     lazy var kphLabel = MLabel()
-    
     lazy var sysLabel = MLabel()
     
-    //MARK: - Initialize -
     init() {
         super.init(frame: .zero)
         
@@ -68,7 +47,6 @@ final class LandingCellContentView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //MARK: - Privat Methods -
     func addAllUIElements() {
         addSubview(cityNameLabel)
         addSubview(tempLabel)
@@ -79,7 +57,6 @@ final class LandingCellContentView: UIView {
         setConstraints()
     }
     
-    //MARK: - Constraints -
     func setConstraints() {
         let offset: CGFloat = 4
         let inset: CGFloat = 20
@@ -99,6 +76,14 @@ final class LandingCellContentView: UIView {
         kphLabel.leadingToSuperview(offset: inset)
         kphLabel.topToBottom(of: mphLabel)
         kphLabel.bottomToSuperview()
+    }
+
+    func update(with model: LandingCellModelType) {
+        cityNameLabel.text  = model.name
+        tempLabel.text      = model.temp
+        sysLabel.text       = "Sunrise:  " + model.sunrise + "\nSunset:  " + model.sunset
+        mphLabel.text       = "\nHumidity:  " + model.humidity + "\nPressure:  " + model.pressure
+        kphLabel.text       = "\nTempMax:  " + model.tempMax + "\nTempMin:  " + model.tempMin
     }
 }
 

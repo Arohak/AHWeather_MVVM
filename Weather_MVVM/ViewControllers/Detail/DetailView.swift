@@ -12,7 +12,6 @@ import TinyConstraints
 class DetailView: UIView {
     let cellHeight: CGFloat = 70
     
-    //MARK: - Create UIElements
     lazy var bgImageView = UIImageView()
 
     lazy var topView: DetailTopView = {
@@ -42,7 +41,6 @@ class DetailView: UIView {
         return view
     }()
     
-    //MARK: - Initialize
     init() {
         super.init(frame: .zero)
         
@@ -54,7 +52,6 @@ class DetailView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //MARK: - Privat Methods -
     private func addAllUIElements() {
         addSubview(bgImageView)
         addSubview(topView)
@@ -64,7 +61,6 @@ class DetailView: UIView {
         setConstraints()
     }
     
-    //MARK: - Constraints
     func setConstraints() {
         let inset: CGFloat = 10
         let topHeight: CGFloat = 170

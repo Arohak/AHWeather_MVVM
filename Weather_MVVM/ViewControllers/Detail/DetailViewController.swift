@@ -12,8 +12,8 @@ class DetailViewController: BaseViewController {
     
     private var detailView = DetailView()
     private var viewModel: DetailViewModelType!
-    private var tableDataProvider: DetailTableDataProvider?
-    private var collectionDataProvider: DetailCollectionDataProvider?
+    private var tableDataProvider: TableDataProvider<DetailDayCellContentView, DetailDayCell>?
+    private var collectionDataProvider: CollectionDataProvider<DetailTimeCellContentView, DetailTimeCell>?
     
     init(viewModel: DetailViewModelType) {
         super.init()
@@ -44,11 +44,11 @@ extension DetailViewController {
     }
     
     private func configTableDataProvider() {
-        tableDataProvider = DetailTableDataProvider(with: detailView.tableView)
+        tableDataProvider = TableDataProvider(with: .init(heightForRow: 44), tableView: detailView.tableView)
     }
     
     private func configCollectionDataProvider() {
-        collectionDataProvider = DetailCollectionDataProvider(with: detailView.collectionView)
+        collectionDataProvider = CollectionDataProvider(collectionView: detailView.collectionView)
     }
     
     private func viewIsReady() {

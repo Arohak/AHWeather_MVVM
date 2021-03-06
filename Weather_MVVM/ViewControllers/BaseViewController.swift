@@ -13,7 +13,6 @@ class BaseViewController: UIViewController {
     
     var cancellableSet: Set<AnyCancellable> = []
 
-    // MARK: - Initializing -
     init() {
         super.init(nibName: nil, bundle: nil)
     }

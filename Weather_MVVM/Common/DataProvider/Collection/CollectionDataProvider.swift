@@ -8,12 +8,19 @@
 
 import UIKit
 
-class DetailCollectionDataProvider: NSObject {
-    private weak var collectionView: UICollectionView?
-    private var items = [DetailTimeCellModelType]()
+class CollectionDataProvider<View: ContainerView, Cell: CollectionViewCell<View>>: NSObject, UICollectionViewDataSource, UICollectionViewDelegate {
+    
+    struct Settings {
+    }
+    
+    public var didSelect: Completion<View.Model>?
+    private var settings: Settings!
+    private weak var collectionView: UICollectionView!
+    private var models = [View.Model]()
 
-    init(with collectionView: UICollectionView) {
+    init(with settings: Settings = .init(), collectionView: UICollectionView) {
         super.init()
+        self.settings = settings
         self.collectionView = collectionView
         config()
     }
@@ -21,30 +28,26 @@ class DetailCollectionDataProvider: NSObject {
     private func config() {
         collectionView?.dataSource = self
         collectionView?.delegate = self
-        collectionView?.registerCell(DetailTimeCell.self)
+        collectionView?.registerCell(Cell.self)
     }
     
-    public func update(with items: [DetailTimeCellModelType]) {
-        self.items = items
+    public func update(with models: [View.Model]) {
+        self.models = models
         collectionView?.reloadData()
     }
-}
-
-//MARK: - UICollectionViewDataSource, UICollectionViewDelegate
-extension DetailCollectionDataProvider: UICollectionViewDataSource, UICollectionViewDelegate {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
+        return models.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(indexPath) as DetailTimeCell
-        let item = items[indexPath.row]
-        cell.configure(viewModel: item)
+        let cell = collectionView.dequeueReusableCell(indexPath) as Cell
+        let model = models[indexPath.row]
+        cell.model = model
         return cell
     }
 }
