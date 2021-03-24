@@ -73,9 +73,31 @@ struct Agent {
     }
 }
 
+struct Fetcher<T: Decodable> {
+    static func run(_ request: Request) -> AnyPublisher<T, Error> {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = request.baseURL.scheme
+        urlComponents.queryItems = request.params
+        urlComponents.host = request.baseURL.host
+        urlComponents.path = request.baseURL.path + request.path
+        
+        var urlRequest = URLRequest(url: urlComponents.url!)
+        urlRequest.httpMethod = request.method.string
+        urlRequest.allHTTPHeaderFields = request.headers
+        
+        return URLSession.shared
+            .dataTaskPublisher(for: urlRequest)
+            .map { $0.data }
+            .decode(type: T.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+}
+
 enum WeatherAPI {
     case leading(city: String)
     case detail(coord: CLLocationCoordinate2D)
+    case forecast(city: String)
 }
 
 extension WeatherAPI: Request {
@@ -91,13 +113,14 @@ extension WeatherAPI: Request {
         switch self {
         case .leading:  return "/weather"
         case .detail:   return "/onecall"
+        case .forecast: return "/forecast"
         }
     }
     
     var params: [URLQueryItem]? {
         var temp: [String: String] = ["APPID": "848c6f714deb2219816b686306bc766d", "units": "metric"]
         switch self {
-        case .leading(let city):
+        case .leading(let city), .forecast(let city):
             temp["q"] = city
         case .detail(let coord):
             temp["lat"] = "\(coord.latitude)"

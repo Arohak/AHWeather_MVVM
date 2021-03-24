@@ -30,6 +30,7 @@ final class LandingViewController: BaseViewController {
         super.viewDidLoad()
         
         configUI()
+        configNavigationBar()
         configDataProvider()
         viewIsReady()
     }
@@ -41,6 +42,11 @@ extension LandingViewController {
     private func configUI() {
         view = landingView
         title = "Landing"
+    }
+    
+    private func configNavigationBar() {
+        let rightButton = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(addAction))
+        navigationItem.rightBarButtonItem = rightButton
     }
     
     private func configDataProvider() {
@@ -67,5 +73,10 @@ extension LandingViewController {
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             .store(in: &cancellableSet)
+    }
+    
+    @objc private func addAction() {
+        let vc = ForecastViewController(viewModel: .init())
+        present(vc, animated: true, completion: nil)
     }
 }
