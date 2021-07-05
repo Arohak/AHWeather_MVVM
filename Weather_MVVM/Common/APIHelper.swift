@@ -2,71 +2,141 @@
 //  APIHelper.swift
 //  Weather_MVVM
 //
-//  Created by Test on 8/16/16.
-//  Copyright © 2016 EGS. All rights reserved.
+//  Created by Ara Hakobyan on 8/16/16.
+//  Copyright © 2020 AroHak. All rights reserved.
 //
 
-import RxSwift
-import SwiftyJSON
-import Alamofire
+/// open weather
+/// https://openweathermap.org/api/one-call-api
 
-let apiHelper = APIHelper.sharedInstance
+/// yandex
+/// https://yandex.ru/dev/weather/doc/dg/concepts/forecast-info-docpage/
+/// https://developer.tech.yandex.ru/services/18/
+/// https://api.weather.yandex.ru/v1/forecast?lat=55.75396&lon=37.620393&extra=false
 
-let baseURLOne = "http://api.openweathermap.org/data/2.5/"
-let baseURLTwo = "http://api.apixu.com/v1/"
-let APPIDOne   = "848c6f714deb2219816b686306bc766d"
-let APPIDTwo   = "6c0d9ec402854c01a6c120751160203"
 
-class APIHelper {
+import Foundation
+import CoreLocation
+import Combine
+import SwiftSpinner
+
+public enum HttpMethod : String {
+    case get, post, put, patch, delete
     
-    static let sharedInstance = APIHelper()
-    let manager = Manager()
+    var string: String {
+        return self.rawValue.uppercased()
+    }
+}
+
+public protocol Request {
+    var method: HttpMethod          { get }
+    var baseURL: URL                { get }
+    var path: String                { get }
+    var params: [URLQueryItem]?     { get }
+    var headers: [String: String]?  { get }
+}
+
+struct Agent {
+    static let imageOWPath = "http://openweathermap.org/img/wn/"
     
-    //MARK: - API Routers
-    private struct ROUTERS {
-        static let GET_CITY_WEATHER             = "weather?APPID=%@&q=%@&units=metric"
-        static let GET_CITY_FORECAST            = "forecast.json?key=%@&q=%@&days=%@"
-//
-//        static let GET_CITY_WEATHER         = "current.json?key=%@&q=%@"
-//        static let GET_CITY_FORECAST        = "forecast/daily?q=%@&mode=json&units=metric&cnt=%@&APPID="
+    static let networkActivityPublisher = PassthroughSubject<Bool, Never>()
+
+    static func run<T: Decodable>(_ request: Request) -> AnyPublisher<T, Error> {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = request.baseURL.scheme
+        urlComponents.queryItems = request.params
+        urlComponents.host = request.baseURL.host
+        urlComponents.path = request.baseURL.path + request.path
+        
+        var urlRequest = URLRequest(url: urlComponents.url!)
+        urlRequest.httpMethod = request.method.string
+        urlRequest.allHTTPHeaderFields = request.headers
+        
+        return URLSession.shared
+            .dataTaskPublisher(for: urlRequest)
+            .map { $0.data }
+            .handleEvents(receiveSubscription: { _ in
+                SwiftSpinner.show("Loading Data...")
+                networkActivityPublisher.send(true)
+            }, receiveOutput: {
+                print(NSString(data: $0, encoding: String.Encoding.utf8.rawValue)!)
+            }, receiveCompletion: { _ in
+                networkActivityPublisher.send(false)
+                SwiftSpinner.hide()
+            }, receiveCancel: {
+                networkActivityPublisher.send(false)
+                SwiftSpinner.hide()
+            })
+            .decode(type: T.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+}
+
+struct Fetcher<T: Decodable> {
+    static func run(_ request: Request) -> AnyPublisher<T, Error> {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = request.baseURL.scheme
+        urlComponents.queryItems = request.params
+        urlComponents.host = request.baseURL.host
+        urlComponents.path = request.baseURL.path + request.path
+        
+        var urlRequest = URLRequest(url: urlComponents.url!)
+        urlRequest.httpMethod = request.method.string
+        urlRequest.allHTTPHeaderFields = request.headers
+        
+        return URLSession.shared
+            .dataTaskPublisher(for: urlRequest)
+            .print("Response 👇")
+            .handleEvents(receiveOutput: { response in
+                print("Request: ", request)
+                print("Response: ", response)
+                let json = try? JSONSerialization.jsonObject(with: response.data, options: [])
+                print("Json: ",  json ?? "No Value")
+            })
+            .map { $0.data }
+            .decode(type: T.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+}
+
+enum WeatherAPI {
+    case leading(city: String)
+    case detail(coord: CLLocationCoordinate2D)
+    case forecast(city: String)
+}
+
+extension WeatherAPI: Request {
+    var method: HttpMethod {
+        return .get
     }
     
-    func rx_Request(method: Alamofire.Method,
-                 url: String,
-                 parameters: [String: AnyObject]? = nil,
-                 showProgress: Bool = true)
-                -> Observable<JSON>
-    {
-        return Observable.create { observer in
-            UIApplication.sharedApplication().networkActivityIndicatorVisible = true
-            if showProgress { UIHelper.showProgressHUD() }
-            
-            let URL = url.stringByAddingPercentEncodingWithAllowedCharacters(.URLQueryAllowedCharacterSet())!
-            self.manager.request(method, URL, parameters: parameters, encoding: .URL)
-                .responseJSON { response in
-                    switch response.result {
-                    case .Success(let data):
-                        observer.onNext(JSON(data))
-                    case .Failure(let error):
-                        UIHelper.showHUD(error.localizedDescription)
-                        observer.onError(error)
-                    }
-                    
-                    UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-                    if showProgress { UIHelper.hideProgressHUD() }
-            }
-            
-            return AnonymousDisposable { }
+    var baseURL: URL {
+        return URL(string: "http://api.openweathermap.org/data/2.5")!
+    }
+    
+    var path: String {
+        switch self {
+        case .leading:  return "/weather"
+        case .detail:   return "/onecall"
+        case .forecast: return "/forecast"
         }
     }
     
-    func rx_GetCityWeather(cityName: String) -> Observable<JSON> {
-        let url = String(format: baseURLOne + ROUTERS.GET_CITY_WEATHER, APPIDOne, cityName)
-        return rx_Request(.GET, url: url)
+    var params: [URLQueryItem]? {
+        var temp: [String: String] = ["APPID": "848c6f714deb2219816b686306bc766d", "units": "metric"]
+        switch self {
+        case .leading(let city), .forecast(let city):
+            temp["q"] = city
+        case .detail(let coord):
+            temp["lat"] = "\(coord.latitude)"
+            temp["lon"] = "\(coord.longitude)"
+        }
+        return temp.map { URLQueryItem(name: $0.key, value: $0.value) }
     }
     
-    func rx_GetCityForecast(cityName: String, days: String) -> Observable<JSON> {
-        let url = String(format: baseURLTwo + ROUTERS.GET_CITY_FORECAST, APPIDTwo, cityName, days)
-        return rx_Request(.GET, url: url)
+    var headers: [String : String]? {
+        return nil
     }
 }
