@@ -9,18 +9,21 @@
 import UIKit
 import TinyConstraints
 
-class DetailView: UIView {
-    let cellHeight: CGFloat = 70
+class DetailView: BaseView {
+    private let cellHeight: CGFloat = 70
     
-    lazy var bgImageView = UIImageView()
+    private lazy var tableDataProvider = TableDataProvider<DetailDayCellContentView, DetailDayCell>(with: .init(heightForRow: 44), tableView: tableView)
+    private lazy var collectionDataProvider = CollectionDataProvider<DetailTimeCellContentView, DetailTimeCell>(collectionView: collectionView)
+    
+    private lazy var bgImageView = UIImageView()
 
-    lazy var topView: DetailTopView = {
+    private lazy var topView: DetailTopView = {
         let view = DetailTopView()
         view.backgroundColor = .black
         return view
     }()
     
-    lazy var collectionView: UICollectionView = {
+    private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.sectionInset = .zero
@@ -33,7 +36,7 @@ class DetailView: UIView {
         return view
     }()
     
-    lazy var tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let view = UITableView()
         view.backgroundColor = .black
         view.separatorStyle = .none
@@ -41,27 +44,31 @@ class DetailView: UIView {
         return view
     }()
     
-    init() {
-        super.init(frame: .zero)
-        
+    convenience init() {
+        self.init(frame: .zero)
+        setupViewConfiguration()
+    }
+    
+    public func update(with detail: DetailModelType) {
+        topView.configure(viewModel: detail.topView)
+        tableDataProvider.update(with: detail.dayCells)
+        collectionDataProvider.update(with: detail.dayCells.first?.hours ?? [])
+    }
+}
+
+extension DetailView: ViewConfiguration {
+    func configureViews() {
         backgroundColor = .white
-        addAllUIElements()
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func addAllUIElements() {
+    func buildViewHierarchy() {
         addSubview(bgImageView)
         addSubview(topView)
         addSubview(collectionView)
         addSubview(tableView)
-
-        setConstraints()
     }
     
-    func setConstraints() {
+    func setupConstraints() {
         let inset: CGFloat = 10
         let topHeight: CGFloat = 170
 

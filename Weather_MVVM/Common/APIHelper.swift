@@ -87,6 +87,13 @@ struct Fetcher<T: Decodable> {
         
         return URLSession.shared
             .dataTaskPublisher(for: urlRequest)
+            .print("Response 👇")
+            .handleEvents(receiveOutput: { response in
+                print("Request: ", request)
+                print("Response: ", response)
+                let json = try? JSONSerialization.jsonObject(with: response.data, options: [])
+                print("Json: ",  json ?? "No Value")
+            })
             .map { $0.data }
             .decode(type: T.self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)

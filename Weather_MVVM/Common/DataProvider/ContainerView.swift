@@ -12,3 +12,4 @@ protocol ContainerView: UIView {
     associatedtype Model
     func update(with model: Model)
 }
+

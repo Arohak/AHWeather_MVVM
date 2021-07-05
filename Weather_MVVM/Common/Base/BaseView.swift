@@ -7,7 +7,18 @@
 //
 
 import UIKit
-import TinyConstraints
+
+//MARK: - BaseView -
+class BaseView: UIView {
+    
+    override init(frame: CGRect) {
+        super.init(frame: .zero)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
 
 //MARK: - BaseTableViewCell -
 class BaseTableViewCell: UITableViewCell {
